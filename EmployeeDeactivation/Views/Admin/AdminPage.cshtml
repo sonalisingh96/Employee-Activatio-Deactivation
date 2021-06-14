@@ -1,0 +1,369 @@
+﻿@model EmployeeDeactivation.Models.DeactivatedEmployeeDetails
+@using System.Security.Principal
+@using System.Security.Claims
+
+<head>
+    <script src="~/js/Toastr.js"></script>
+
+    <script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-1.8.0.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery.ui/1.8.22/jquery-ui.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://www.w3schools.com/lib/w3.js"></script>
+
+    <script src="~/js/bootbox.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("SponsorDetails", "Admin")',
+                dataType: "json",
+                success: function (response) {
+                    var row;
+                    $.each(response, function (i, item) {
+
+                        row += "<tbody><tr class=item><td id=team >" + item.teamName + "</td><td id=fn>" + item.sponsorFirstName + " " + item.sponsorLastName + "</td><td id=ln>" + item.sponsorGID + "</td><td id=em>" + item.sponsorEmailID + "</td><td id=dep>" + item.department + "</td><td id=rm>" + item.reportingManagerEmail + "</td><td><span id=edit class='glyphicon glyphicon-pencil cursor' style='font-size:30px;color:blue'></span><span id=delete class='glyphicon glyphicon-remove cursor' style='font-size:30px;color:red'></span></td></tr></tbody>"
+
+                    });
+                    $("#tbldata").append(row);
+                }
+            })
+        });
+
+        $(document).on("click", "#delete", function (e) {
+            var $row = $(this).closest("tr"),
+                $tds = $row.find("td:nth-child(3)").text();
+            bootbox.dialog({
+                message: "Are you sure you want to delete the selected sponsor details?",
+                size: "small",
+                buttons: {
+                    confirm: {
+                        label: 'Yes',
+                        callback: function (result) {
+                            $.ajax({
+                                type: "POST",
+                                url: '@Url.Action("DeleteSponsorDetails", "Admin")',
+                                data: { 'gId': $tds },
+                                dataType: "json",
+                                success:
+                                    function (response) {
+                                        if (response) {
+                                            bootbox.alert("Sponsor details has been sucessfully deleted", function () {
+                                                window.location.reload()
+                                            });
+                                    };
+
+                                }
+                            });
+
+                        }
+                    },
+                    cancel: {
+                        label: 'No',
+                    }
+                }
+            })
+        });
+
+        $(document).on("click", "#edit", function (e) {
+            var $row = $(this).closest("tr"),
+
+            $editTeamName = $row.find("td:nth-child(1)").text();
+            $('#editTeamName').val($editTeamName);
+
+            $editLastName = $row.find("td:nth-child(2)").text();
+            var sponsorName = $editLastName
+            var splitName = sponsorName.split(" ");
+            var firstName = splitName[0];
+            var lastName = splitName[1];
+
+            $('#editFirstName').val(firstName);
+
+            $('#editLastName').val(lastName);
+
+            $editgid = $row.find("td:nth-child(3)").text();
+            $('#editgid').val($editgid);
+
+            $editEmail = $row.find("td:nth-child(4)").text();
+            $('#editEmail').val($editEmail);
+
+            $editDepartment = $row.find("td:nth-child(5)").text();
+            $('#editDepartment').val($editDepartment);
+
+            $editRmEmail = $row.find("td:nth-child(6)").text();
+            $('#editRmEmail').val($editRmEmail);
+
+            openForm1();
+            $(document).on("click", "#submit2", function (e) {
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("AddSponsorDetails", "Admin")',
+                    dataType: "json",
+                    data: { 'teamName': $('#editTeamName').val(), 'sponsorFirstName': $('#editFirstName').val(), 'sponsorLastName': $('#editLastName').val(), 'sponsorGid': $('#editgid').val(), 'sponsorEmail': $('#editEmail').val(), 'sponsorDepartment': $('#editDepartment').val(), 'reportingManagerEmail': $('#editRmEmail').val() },
+                    success: alert("Sponsor Details Have been edited Sucessfully!")
+
+
+                });
+            });
+        });
+
+
+        $(document).on("click", "#addButton", function (e) {
+            openForm();
+            $(document).on("click", "#submit1", function (e) {
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("AddSponsorDetails", "Admin")',
+                    dataType: "json",
+                    data: { 'teamName': $('#teamName').val(), 'sponsorFirstName': $('#sponsorFirstName').val(), 'sponsorLastName': $('#sponsorLastName').val(), 'sponsorGid': $('#sponsorGid').val(), 'sponsorEmail': $('#sponsorEmail').val(), 'sponsorDepartment': $('#sponsorDepartment').val(), 'reportingManagerEmail': $('#reportingManEmail').val() },
+                    success:alert("Sponsor Details Have been added Sucessfully!")
+                    //    function (response) {
+                    //    if (response) {
+                    //        bootbox.alert("Sponsor Details Have been deleted Sucessfully!", function () {
+                    //            window.location.reload();
+                    //        });
+
+                    //    }
+                    //    else {
+                    //        alert("hdkfhkh");
+                    //    }
+
+                    //}
+                });
+            });
+        });
+
+        function openForm1()
+        {
+            document.getElementById("myForm1").style.display = "block";
+        }
+        function closeForm1()
+        {
+            document.getElementById("myForm1").style.display = "none";
+        }
+        function openForm()
+        {
+            document.getElementById("myForm").style.display = "block";
+        }
+
+        function closeForm()
+        {
+            document.getElementById("myForm").style.display = "none";
+        }
+
+        window.onclick = function (event) {
+            if (event.target == myForm)
+            {
+                document.getElementById("myForm").style.display = "none";
+            }
+
+        }
+    </script>
+    <style>
+        .tablee {
+            padding-left: 50px;
+            padding-right: 50px;
+            margin-top: 100px;
+        }
+
+        .header {
+            width: 100%;
+            margin-top: 0px;
+            padding: 20px;
+            margin-bottom: 5px;
+            text-align: center;
+            background-color: black;
+            color: white;
+            font-size: 30px;
+        }
+
+        #edit {
+            color: green;
+        }
+
+        #delete {
+            color: red;
+        }
+
+        #addButton {
+            background-color: #00a550;
+            width: 400px;
+            margin-left: 50px;
+            font-weight: bold;
+            color: white;
+        }
+
+            #addButton:hover {
+                background-color: green;
+            }
+
+        .form-popup {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            z-index: 1;
+            top: 4%;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+        }
+
+
+        .form-container {
+            max-width: 500px;
+            padding: 10px;
+            background-color: white;
+            border: 5px solid #ecebe4;
+            margin: auto;
+        }
+
+            .form-container input[type=text], .form-container input[type=password], .form-container input[type=email] {
+                width: 100%;
+                padding: 3px;
+                margin: 2px 0 4px 0;
+                border: none;
+                background: #f1f1f1;
+            }
+
+
+
+                .form-container input[type=text]:focus, .form-container input[type=password]:focus, .form-container input[type=email]:focus {
+                    background-color: #ddd;
+                    outline: none;
+                }
+
+
+
+            .form-container .btn {
+                background-color: #04AA6D;
+                color: white;
+                padding: 5px 8px;
+                border: none;
+                cursor: pointer;
+                width: 100%;
+                margin-bottom: 10px;
+                opacity: 0.8;
+            }
+
+
+            .form-container .cancel {
+                background-color: red;
+            }
+
+
+            .form-container .btn:hover, .open-button:hover {
+                opacity: 1;
+            }
+
+        h3 {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2> Sponsor Details </h2>
+    </div>
+    <div class="tablee">
+
+        <table id="tbldata" class="table table-bordered ">
+            <thead>
+                <tr>
+                    <th scope="col" onclick="w3.sortHTML('#tbldata', '.item', 'td:nth-child(1)')" style="cursor:pointer"> Team</th>
+                    <th scope="col" onclick="w3.sortHTML('#tbldata', '.item', 'td:nth-child(2)')" style="cursor:pointer"> Sponsor Name</th>
+                    <th scope="col" onclick="w3.sortHTML('#tbldata', '.item', 'td:nth-child(3)')" style="cursor:pointer"> GID</th>
+                    <th scope="col" onclick="w3.sortHTML('#tbldata', '.item', 'td:nth-child(4)')" style="cursor:pointer"> Sponsor Email</th>
+                    <th scope="col" onclick="w3.sortHTML('#tbldata', '.item', 'td:nth-child(5)')" style="cursor:pointer"> Sponsor Department</th>
+                    <th scope="col" onclick="w3.sortHTML('#tbldata', '.item', 'td:nth-child(6)')" style="cursor:pointer"> Reporting Manager Email</th>
+                    <th scope="col"> Action</th>
+
+                </tr>
+            </thead>
+
+        </table>
+
+    </div>
+
+    <input type="button" value="ADD" class="btn btn-default"  id="addButton" />
+    <div id="pop1">
+        <div class="form-popup" id="myForm">
+            <form class="form-container">
+                <h3>Add Sponsor Details</h3>
+
+                <label for="Team"><b>Team Name</b></label>
+                <input type="text" placeholder="Team Name" id="teamName" name="team" required>
+
+                <label for="fisrtname"><b>Sponsor Fisrt Name</b></label>
+                <input type="text" placeholder="First Name" id="sponsorFirstName" name="fisrtname" required>
+
+                <label for="lastname"><b>Sponsor Last Name</b></label>
+                <input type="text" placeholder="Last Name" id="sponsorLastName" name="lastname" required>
+
+                <label for="gid"><b>Sponsor GID</b></label>
+                <input type="text" placeholder="GID" id="sponsorGid" name="gid" required>
+
+                <label for="email"><b>Sponsor Email Id</b></label>
+                <input type="email" placeholder="Email Id" id="sponsorEmail" name="email" required>
+
+                <label for="department"><b>Sponsor Department</b></label>
+                <input type="text" placeholder="Department" id="sponsorDepartment" name="department" required>
+
+                <label for="email"><b>Reporting Manager Email Id</b></label>
+                <input type="email" placeholder="Email Id" id="reportingManEmail" name="Rmemail" required>
+
+
+                <button type="submit" id="submit1" class="btn">Submit</button>
+                <button type="button" class="btn cancel" onclick="closeForm()">Close</button>
+
+            </form>
+        </div>
+    </div>
+
+    <div id="pop2">
+        <div class="form-popup" id="myForm1">
+            <form class="form-container">
+                <h3>Edit Sponsor Details</h3>
+
+                <label for="Team"><b>Team Name</b></label>
+                <input type="text" placeholder="Team Name" name="team" id="editTeamName">
+
+                <label for="fisrtname"><b>Sponsor Fisrt Name</b></label>
+                <input type="text" placeholder="First Name" name="fisrtname" id="editFirstName">
+
+                <label for="lastname"><b>Sponsor Last Name</b></label>
+                <input type="text" placeholder="Last Name" name="lastname" id="editLastName">
+
+                <label for="gid"><b>Sponsor GID</b></label>
+                <input type="text" placeholder="GID" name="gid" id="editgid" readonly>
+
+                <label for="email"><b>Sponsor Email Id</b></label>
+                <input type="email" placeholder="Email Id" name="email" id="editEmail" >
+
+                <label for="department"><b>Sponsor Department</b></label>
+                <input type="text" placeholder="Department" name="department" id="editDepartment">
+
+                <label for="email"><b>Reporting Manager Email Id</b></label>
+                <input type="email" placeholder="Email Id" name="Rmemail" id="editRmEmail">
+
+
+                <button type="submit" id="submit2" class="btn">Submit</button>
+                <button type="button" class="btn cancel" onclick="closeForm1()">Close</button>
+
+            </form>
+        </div>
+    </div>
+
+
+</body>
+
+
+

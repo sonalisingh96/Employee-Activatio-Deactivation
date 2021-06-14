@@ -1,0 +1,530 @@
+﻿@model EmployeeDeactivation.Models.DeactivatedEmployeeDetails
+@using System.Security.Principal
+@using System.Security.Claims
+@if (User.Identity.IsAuthenticated)
+
+
+{
+    var identity = User.Identity as ClaimsIdentity;
+    var displayy = "none";
+    var displayyy = "none";
+    if ((identity.Claims.Any(c => c.Type == "groups" && c.Value.Equals("48b47645-cabb-4ca9-8749-5e1e79b1a9dc"))) == true)
+    {
+        displayyy = "block";
+    }
+    if ((identity.Claims.Any(c => c.Type == "groups" && c.Value.Equals("c9b7fa80-eb0a-4f65-8aca-59e8712c6f02"))) == true)
+    {
+        displayy = "block";
+    }
+    string emailId = identity.Claims.FirstOrDefault(c => c.Type == "preferred_username")?.Value;
+    string UserName = (User.Identities.FirstOrDefault().Claims.Where(c => c.Type.Equals("name")).FirstOrDefault().Value);
+    var split = UserName.Split(" ");
+    var firstName = split[0];
+    var lastName =" ";
+
+    if (split.Length == 2)
+    {
+        lastName = split[1];
+    }
+    <head>
+
+
+        <script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
+        <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-1.8.0.js"></script>
+        <script src="https://ajax.aspnetcdn.com/ajax/jquery.ui/1.8.22/jquery-ui.js"></script>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+        <script src="~/js/bootbox.js"></script>
+        <script type="text/javascript">
+
+        $(document).ready(function () {
+            GetTeamNames();
+            $('#sponsorDetails').hide();
+            $('#reportingManagerEmailId').hide();
+            $('#sponsorGidHidden').hide();
+            
+        });
+        var x = setInterval(Reminder, 86400000);
+        function Reminder() {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("SendReminder", "Pdf")',
+                success: function (response) {
+
+                }
+            })
+        }
+
+        function GetTeamNames() {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetSponsorDetails", "Employees")',
+                dataType: "json",
+                success: function (response) {
+                    $('#teamNames').append(
+                        $('<option selected disabled hidden></option>').val('').html('Choose Here')
+                    );
+                    $.each(response, function (i, item) {
+                        $('#teamNames').append($('<option>', {
+                            value: item.teamName,
+                            text: item.teamName
+                        }));
+
+                    });
+                }
+            })
+        }
+
+        $(document).on("change", "#teamNames", function (e) {
+            var teamName = $('#teamNames').val();
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetSponsorDetails", "Employees")',
+                dataType: "json",
+                success: function (response) {
+
+
+                    $.each(response, function (i, item) {
+                        if (item.teamName == teamName) {
+                            $('#sponsorFirstName').val(item.sponsorFirstName + " " + item.sponsorLastName);
+                            $('#sponsorEmail').val(item.sponsorEmailID);
+                            $('#sponsorDepartment').val(item.department);
+                            $('#sponsorGid').val(item.sponsorGID);
+                            $('#reportingManagerEmail').val(item.reportingManagerEmail);
+                            $('#sponsorDetails').show();
+                            
+
+                        }
+                    });
+                }
+            })
+        });
+
+        $(document).on("click", "#submitButton", function (e) {
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AddDetails", "Employees")',
+                dataType: "json",
+                data: { 'firstName': $('#employeeFirstName').val(), 'lastName': $('#employeeLastName').val(), 'gId': $('#employeeGid').val(), 'email': $('#employeeEmail').val(), 'lastWorkingDate': $('#employeeLastWorkingdate').val(), 'teamsName': $('#teamNames').val(), 'sponsorName': $('#sponsorFirstName').val(), 'sponsorEmailId': $('#sponsorEmail').val(), 'sponsorDepartment': $('#sponsorDepartment').val(), 'sponsorGID': $('#sponsorGid').val() },
+                success: function (response) {
+                    if (response) {
+                        $.ajax({
+                            type: "GET",
+                            url: '@Url.Action("Index", "Pdf")',
+                            data: { 'gId': $('#employeeGid').val() },
+                            dataType: "json",
+                            success: function (response) {
+                                if (response) {
+                                    let pdfWindow = window.open("")
+                                    pdfWindow.document.write("<title>Deactivation Form PDF</title><iframe width='100%' height='100%' src='" + response + "'></iframe>")
+
+                                    bootbox.confirm
+                                        ({
+                                            message: "Do you wish to submit? no further changes can be made to the pdf after submission",
+                                            buttons: {
+                                                confirm: {
+                                                    label: 'Yes',
+                                                    className: 'btn-class-here'
+
+                                                },
+                                                cancel: {
+                                                    label: 'No',
+                                                    className: 'btn-class-here'
+                                                }
+                                            },
+                                            callback: function (result) {
+                                                if (result) {
+                                                    $.ajax({
+                                                        type: "POST",
+                                                        url: '@Url.Action("PdfAttachment", "Pdf")',
+                                                        data: { 'memoryStream': response.toString().replace('data:application/pdf;base64,', ''), 'employeeName': $('#employeeFirstName').val() + " " + $('#employeeLastName').val(), 'teamName': $('#teamNames').val()},
+                                                        success: function (stream) {  
+                                                    $.ajax({
+                                                        type: "POST",
+                                                        url: '@Url.Action("PdfDoc", "ManagerAproval")',
+                                                        data: { 'memoryStream': response.toString().replace('data:application/pdf;base64,', ''), 'employeeName': $('#employeeFirstName').val() + " " + $('#employeeLastName').val(), 'teamName': $('#teamNames').val(), 'gId': $('#employeeGid').val(), 'lastWorkingDatee': $('#employeeLastWorkingdate').val(), 'sponsorName': $('#sponsorFirstName').val(), 'reportingManagerEmail': $('#reportingManagerEmail').val()},
+                                                        success: function (stream) {
+                                                            bootbox.alert("Your form has been sent sucessfully!");
+                                                            
+
+                                                        }
+                                                    });
+                                                
+                                                            
+
+                                                        }
+                                                    });
+                                                }
+                                            }
+                                        });
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        });
+        var Regx = "^[a-zA-Z-]+$";
+        function ValidateFirstName() {
+            if ($('#employeeFirstName').val().trim().search(Regx)) {
+                document.getElementById('employeeFirstName').style.borderColor = 'red';
+                $('#employeeFNameError').show();
+                return false;
+            } else {
+                document.getElementById('employeeFirstName').style.borderColor = 'grey';
+                $('#employeeFNameError').hide();
+                return true;
+            }
+        }
+        function ValidateLastName() {
+            if ($('#employeeLastName').val().trim().search(Regx)) {
+                document.getElementById('employeeLastName').style.borderColor = 'red';
+                $('#employeeLNameError').show();
+                return false;
+            } else {
+                document.getElementById('employeeLastName').style.borderColor = 'grey';
+                $('#employeeLNameError').hide();
+                return true;
+            }
+        }
+
+        function checkDate() {
+            var seletedDate = document.getElementById('employeeLastWorkingdate').value;
+            var now = new Date();
+            var dt1 = Date.parse(now),
+                dt2 = Date.parse(seletedDate);
+            if (dt2 < dt1) {
+                document.getElementById('employeeLastWorkingdate').style.borderColor = 'red';
+                $('#employeeDateError').show();
+                return false;
+            } else {
+                document.getElementById('employeeLastWorkingdate').style.borderColor = 'grey';
+                $('#employeeDateError').hide();
+                return true;
+            }
+        }
+
+        var expr = /^([\w-\.]+)@@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/;
+        function ValidateEmail() {
+            if ($('#employeeEmail').val().trim().search(expr)) {
+                document.getElementById('employeeEmail').style.borderColor = 'red';
+                $('#employeeEmailError').show();
+                return false;
+            } else {
+                document.getElementById('employeeEmail').style.borderColor = 'grey';
+                $('#employeeEmailError').hide();
+                return true;
+            }
+        }
+
+        $(function () {
+            $("#submitButton").click(function (e) {
+                if (document.getElementById('employeeFirstName').value == "" || ValidateFirstName() == false) {
+                    alert("Please provide your First Name");
+                    document.getElementById('employeeFirstName').focus();
+                    return false;
+                }
+                if (document.getElementById('employeeLastName').value == "" || ValidateLastName() == false) {
+                    alert("Please provide your Last Name");
+                    document.getElementById('employeeLastName').focus();
+                    return false;
+                }
+                if (document.getElementById('employeeGid').value == "") {
+                    alert("Please provide your GID");
+                    document.getElementById('employeeGid').focus();
+                    return false;
+                }
+                if (document.getElementById('employeeEmail').value == "" || ValidateEmail() == false) {
+                    alert("Please provide your Email");
+                    document.getElementById('employeeEmail').focus();
+                    return false;
+                }
+                if (document.getElementById('employeeLastWorkingdate').value == "" || checkDate() == false) {
+                    alert("Please provide your Last Working date");
+                    document.getElementById('employeeLastWorkingdate').focus();
+                    return false;
+                }
+                if (document.getElementById('teamNames').value == "") {
+                    alert("Please select your team");
+                    return false;
+                }
+            });
+        });
+
+
+
+        </script>
+
+        <style>
+
+            #header {
+                width: 102%;
+                margin-top: 0px;
+                padding: 20px;
+                margin-bottom: 5px;
+                background-color: black;
+                height: 17%;
+                position: relative;
+            }
+
+            .headerText {
+                text-align: center;
+                font-size: 30px;
+                color: white;
+                position: absolute;
+                margin-left: 35%;
+                margin-top: 5px;
+            }
+
+            #sponsorDetailsButton {
+                margin-bottom: 5px;
+            }
+
+            #sponsorDetailsButton, #viewReportButton {
+                margin-left: 90%;
+                color: white;
+            }
+                #managerButton{
+                    color:white;
+                    position:absolute;
+                    margin-top:7px;
+                    margin-left:90%;
+                    font-size:104%;
+                }
+
+                #sponsorDetailsButton:hover, #viewReportButton:hover {
+                    font-size: 103%;
+                    color: darkgrey;
+                    cursor: default;
+                }
+            #managerButton:hover {
+                font-size: 110%;
+                color: darkgrey;
+                cursor: default;
+            }
+
+            .form {
+                margin-top: 32px;
+                margin-left: 33%;
+            }
+
+            #TextField {
+                white-space: nowrap;
+                padding-left: 0px;
+            }
+
+            #hello {
+                color: blue;
+                font-size: 17px;
+                text-align: center;
+            }
+
+            #inputTextbox {
+                margin-left: 70px;
+                width: 400px;
+            }
+
+            .ErrorView {
+                color: red;
+                margin-left: 183px;
+            }
+
+            #submitButton:hover {
+                background-color: Highlight;
+                color: azure;
+            }
+
+            .regular-field {
+                text-align: center;
+            }
+
+            .radio-but1 {
+                margin-right: 5px;
+            }
+
+            #radio-1-txt {
+                margin-right: 10px;
+            }
+
+            @@media only screen and (max-width:880px) {
+                .regular-field {
+                    position: relative;
+                }
+                #header {
+                    width: 130%;
+                }
+                #sponsorDetailsButton, #viewReportButton {
+                    background-color:blue;
+                }
+
+                .ErrorView {
+                margin-left: 80px;
+                }
+
+                #submitButton {
+                    position: center;
+                }
+
+                .headerText {
+                    position: relative;
+                }
+            }
+        </style>
+
+
+    </head>
+
+    <body>
+        <div id="header">
+            <h2 class="headerText">Employee Deactivation Form </h2>
+            <div id="sponsorDetailsButton" style="display:@displayy" onclick="window.open('@Url.Action("AdminPage", "Admin")','_self')">Sponsor Details</div>
+            <div>
+                <div id="viewReportButton" style="display:@displayy" onclick="window.open('@Url.Action("AccountDeactivationDatePage", "Admin")','_self')">View Report</div>
+
+            </div>
+            <div>
+                <div id="managerButton" style="display:@displayyy" onclick="window.open('@Url.Action("ManagerApprovalPage", "ManagerApproval")','_self')">Workflow</div>
+
+            </div>
+        </div>
+        <br />
+
+        <div class="regular-field" id="act/de_toggel" style="display:@displayyy">
+
+            <input type="radio" id="radio-six" name="notaswitch-one" value="yes" checked onchange="window.open('@Url.Action("Create", "Employees")','_self')" />
+            <label for="radio-six" id="radio-1-txt">Deactivation Form</label>
+
+            <input type="radio" id="radio-seven" name="notaswitch-one" value="maybe" onclick="window.open('@Url.Action("ActivationPage", "Employees")','_self')" />
+            <label for="radio-seven">Activation Form</label>
+
+        </div>
+
+        <div class="form">
+            <form class="form-group" action="Create">
+
+                <div class="form-group row">
+                    <label class="control-label col-sm-1" id="TextField">
+                        First Name:
+                    </label>
+                    <div class="col-sm-3" id="inputTextbox">
+                        <input type="text" value=@firstName class="form-control" id="employeeFirstName" onkeyup="ValidateFirstName()" placeholder="First Name" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label id="employeeFNameError" hidden class="ErrorView">only Alphabets are allowed</label>
+                </div>
+
+                <div class="form-group row">
+                    <label class="control-label col-sm-1" id="TextField">
+                        Last Name:
+                    </label>
+                    <div class="col-sm-3" id="inputTextbox">
+                        <input type="text" value=@lastName " " class="form-control" id="employeeLastName" onkeyup="ValidateLastName()" placeholder="Last Name" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label id="employeeLNameError" hidden class="ErrorView">only Alphabets are allowed</label>
+                </div>
+
+                <div class="form-group row">
+                    <label class="control-label col-sm-1" id="TextField">
+                        GID:
+                    </label>
+                    <div class="col-sm-3" id="inputTextbox">
+                        <input type="text" class="form-control" id="employeeGid" placeholder="GID" />
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label class="control-label col-sm-1" id="TextField">
+                        Email:
+                    </label>
+                    <div class="col-sm-3" id="inputTextbox">
+                        <input type="text" value=@emailId class="form-control" id="employeeEmail" placeholder="Email" onkeyup="ValidateEmail()" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label id="employeeEmailError" hidden class="ErrorView">Invalid Email Format</label>
+                </div>
+
+                <div class="form-group row">
+                    <label class="control-label col-sm-1" id="TextField">
+                        Last Working Date:
+                    </label>
+                    <div class="col-sm-3" id="inputTextbox">
+                        <input type="date" class="form-control" id="employeeLastWorkingdate" onchange="checkDate()" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label id="employeeDateError" hidden class="ErrorView">Last Working Date must be in the future</label>
+                </div>
+
+                <div class="form-group row">
+                    <label id="TextField" class="control-label col-sm-1">
+                        Select Team :
+                    </label>
+                    <div class="col-sm-3" id="inputTextbox">
+                        <select id="teamNames" class="form-control"></select>
+                    </div>
+                </div>
+
+                <div id="sponsorDetails">
+
+                    <div class="form-group row">
+                        <label class="control-label col-sm-1" id="TextField">
+                            Sponsor Name:
+                        </label>
+                        <div class="col-sm-3" id="inputTextbox">
+                            <input type="text" class="form-control" id="sponsorFirstName" readonly />
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="control-label col-sm-1" id="TextField">
+                            Sponsor Email:
+                        </label>
+                        <div class="col-sm-3" id="inputTextbox">
+                            <input type="text" class="form-control" id="sponsorEmail" readonly />
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="control-label col-sm-1" id="TextField">
+                            Sponsor Department:
+                        </label>
+                        <div class="col-sm-3" id="inputTextbox">
+                            <input type="text" class="form-control" id="sponsorDepartment" readonly />
+                        </div>
+                    </div>
+
+
+                </div>
+
+                <div id="sponsorGidHidden">
+                    <input type="text" class="form-control" id="sponsorGid" readonly />
+                </div>
+
+                <div id="reportingManagerEmailId">
+                    <input type="text" class="form-control" id="reportingManagerEmail" readonly />
+                </div>
+
+
+                <div class="form-group row" style="padding-left:2px">
+                    <br />
+                    <input type="button" value="Generate PDF" class="btn btn-default" id="submitButton" />
+                </div>
+
+            </form>
+        </div>
+    </body>
+}
+
+
+
+
+
+

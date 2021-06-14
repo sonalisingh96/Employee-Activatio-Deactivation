@@ -1,0 +1,155 @@
+﻿@using EmployeeDeactivation.Models;
+@model IEnumerable<ActivationWorkflowModel>
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-1.8.0.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery.ui/1.8.22/jquery-ui.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://www.w3schools.com/lib/w3.js"></script>
+
+    <script src="~/js/bootbox.js"></script>
+    <script type="text/javascript">
+
+        function deactivationPage() {
+            
+            if ($('#inlineFormCustomSelectPref').val() == "Deactivation") {
+                window.open('@Url.Action("AccountDeactivationDatePage", "Admin")', '_self');
+
+            }
+            
+        }
+
+        function filterRows() {
+
+            var from = $('#datefilterfrom').val();
+            var to = $('#datefilterto').val();
+
+            if (!from && !to) {
+                return;
+            }
+
+
+            var dateFrom = moment(from);
+            var dateTo = moment(to);
+
+            $('#testTable tr').each(function (i, tr) {
+
+                var val = $(tr).find("td:nth-child(7)").text();
+                var dateVal = moment(val, "DD/MM/YYYY");
+                var visible = (dateVal.isBetween(dateFrom, dateTo, null, [])) ? "" : "none";
+                $(tr).css('display', visible);
+            });
+        }
+    </script>
+
+    <style>
+        #toggel {
+            margin-left: 55px;
+        }
+        #dateInput {
+            margin-left: 40px;
+        }
+
+        #TableDeact {
+            padding-left: 50px;
+            padding-right: 50px;
+            margin-top: 100px;
+        }
+
+        th {
+            white-space: nowrap;
+        }
+
+        .header {
+            width: 100%;
+            margin-top: 0px;
+            padding: 20px;
+            margin-bottom: 5px;
+            text-align: center;
+            background-color: black;
+            color: white;
+            font-size: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Activation Accounts Details </h2>
+    </div>
+
+    <div id="toggel">
+        <label class="my-1 mr-2" for="inlineFormCustomSelectPref">Workflow:</label>
+        <select class="custom-select my-1 mr-sm-2" id="inlineFormCustomSelectPref" onchange="deactivationPage()">
+            <option value="Activation" selected>Activation</option>
+            <option value="Deactivation">Deactivation</option>
+        </select>
+    </div>
+
+    <div id="dateInput">
+        <div class="col-md-3">
+            <h5>Date from:</h5>
+            <input type="date" class="form-control" id="datefilterfrom" data-date-split-input="true" onchange="filterRows()">
+        </div>
+        <div class="col-md-3">
+            <h5>Date to:</h5>
+            <input type="date" class="form-control" id="datefilterto" data-date-split-input="true" onchange="filterRows()">
+        </div>
+    </div>
+
+    <div id="TableDeact" class="table-responsive">
+        <table id="testTable" class="table" border="1">
+            <thead>
+                <tr>
+                    <th scope="col" onclick="w3.sortHTML('#testTable', '.item', 'td:nth-child(1)')" style="cursor:pointer">Name</th>
+                    <th scope="col" onclick="w3.sortHTML('#testTable', '.item', 'td:nth-child(2)')" style="cursor:pointer">Email ID</th>
+                    <th scope="col" onclick="w3.sortHTML('#testTable', '.item', 'td:nth-child(3)')" style="cursor:pointer">GID</th>
+                    <th scope="col" onclick="w3.sortHTML('#testTable', '.item', 'td:nth-child(4)')" style="cursor:pointer">Team</th>
+                    <th scope="col" onclick="w3.sortHTML('#testTable', '.item', 'td:nth-child(5)')" style="cursor:pointer">Role</th>
+                    <th scope="col" onclick="w3.sortHTML('#testTable', '.item', 'td:nth-child(6)')" style="cursor:pointer">Gender</th>
+                    <th scope="col" onclick="w3.sortHTML('#testTable', '.item', 'td:nth-child(7)')" style="cursor:pointer">Date Of Birth</th>
+                    <th scope="col" onclick="w3.sortHTML('#testTable', '.item', 'td:nth-child(8)')" style="cursor:pointer">Place of Birth</th>
+                    <th scope="col" onclick="w3.sortHTML('#testTable', '.item', 'td:nth-child(8)')" style="cursor:pointer">Address</th>
+                    <th scope="col" onclick="w3.sortHTML('#testTable', '.item', 'td:nth-child(8)')" style="cursor:pointer">Phone No.</th>
+                    <th scope="col" onclick="w3.sortHTML('#testTable', '.item', 'td:nth-child(8)')" style="cursor:pointer">Nationality</th>
+                </tr>
+            </thead>
+            @foreach (ActivationWorkflowModel details in Model)
+            {
+                <tbody>
+
+                    <tr class=item>
+
+                        <td>@details.FirstName @details.LastName</td>
+                        <td>@details.SiemensEmailId</td>
+                        <td>@details.SiemensGID</td>
+                        <td>@details.Team</td>
+                        <td>@details.Role</td>
+                        <td>@details.Gender</td>
+                        <td>@details.DateOfBirth.Day - @details.DateOfBirth.Month - @details.DateOfBirth.Year</td>
+                        <td>@details.PlaceofBirth</td>
+                        <td>@details.Address</td>
+                        <td>@details.PhoneNo</td>
+                        <td>@details.Nationality</td>
+                    </tr>
+                </tbody>
+            }
+        </table>
+    </div>
+</body>
+</html>
+
+
+

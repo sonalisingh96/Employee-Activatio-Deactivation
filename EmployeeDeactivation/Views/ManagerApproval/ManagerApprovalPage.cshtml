@@ -1,0 +1,241 @@
+﻿
+@model EmployeeDeactivation.Models.ManagerApprovalStatus
+@using System.Security.Principal
+@using System.Security.Claims
+
+<head>
+
+    <script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-1.8.0.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery.ui/1.8.22/jquery-ui.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <script src="~/js/bootbox.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $('#text').hide();
+
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("DeactivationDetails","ManagerApproval")',
+                dataType: "json",
+                success: function (response) {
+                    var row;
+                    if (response.length == 0) {
+                        $('#tbldata').hide();
+                        $('#text').show();
+                    }
+                    else {
+                    $('#text').hide();
+
+                    $.each(response, function (i, item) {
+                        var dateTime = item.lastworkingDate;
+                        var splitDateTime = dateTime.split(" ");
+                        var date = splitDateTime[0];
+
+                        row += "<tbody><tr class=item><td id=team >" + item.employeeName + "</td><td id=fn>" + item.gId + "</td><td id=ln>" + date + "</td><td id=em>" + item.teamName + "</td><td id=dep>" + item.sponsorName + "</td><td id=rm>" + item.reportingManagerEmail + "</td><td><span id=approve class='glyphicon glyphicon-ok cursor' style='font-size:30px;color:green'></span><span id=decline class='glyphicon glyphicon-remove' style='font-size:30px;color:red'></span><span id=download  class='glyphicon glyphicon-download-alt' style='font-size:30px;color:blue'></span></td></tr></tbody>"
+
+                    });
+                    $("#tbldata").append(row);
+                }
+            }
+            })
+
+            $(document).on("click", "#download", function (e) {
+               
+            var $row = $(this).closest("tr"),
+                $tds = $row.find("td:nth-child(2)").text();
+                            $.ajax({
+                                type: "GET",
+                                url: '@Url.Action("PdfDetails", "ManagerApproval")',
+                                data: {'GId': $tds},
+                                dataType: "json",
+                                success:
+                                    function (result) {
+                                        let pdfWindow = window.open("")
+                                    pdfWindow.document.write("<title>Deactivation Form PDF</title><iframe width='100%' height='100%' src='" + result + "'></iframe>")
+                                }
+                            });
+                   
+            });
+
+            $(document).on("click", "#approve", function (e) {
+               
+            var $row = $(this).closest("tr"),
+                $tds = $row.find("td:nth-child(2)").text();
+                            $.ajax({
+                                type: "GET",
+                                url: '@Url.Action("RequestApprove", "ManagerApproval")',
+                                data: {'GId': $tds},
+                                dataType: "json",
+                                success: function (res) {
+                                    window.location.reload()
+                                }
+
+                            });
+                   
+            });
+
+            $(document).on("click", "#decline", function (e) {
+               
+            var $row = $(this).closest("tr"),
+                $tds = $row.find("td:nth-child(2)").text();
+                            $.ajax({
+                                type: "GET",
+                                url: '@Url.Action("RequestDenied", "ManagerApproval")',
+                                data: {'GId': $tds},
+                                dataType: "json",
+                                success:function (r) {
+                                        window.location.reload()     
+                                }
+                            });
+                   
+            });
+
+        });
+
+    </script>
+
+
+    <style>
+        .tablee {
+            padding-left: 50px;
+            padding-right: 50px;
+            margin-top: 100px;
+        }
+
+        .header {
+            width: 100%;
+            margin-top: 0px;
+            padding: 20px;
+            margin-bottom: 5px;
+            text-align: center;
+            background-color: black;
+            color: white;
+            font-size: 30px;
+        }
+
+        #edit {
+            color: green;
+        }
+
+        #delete {
+            color: red;
+        }
+
+        #addButton {
+            background-color: #00a550;
+            width: 400px;
+            margin-left: 50px;
+            font-weight: bold;
+            color: white;
+        }
+
+            #addButton:hover {
+                background-color: green;
+            }
+
+        .form-popup {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            z-index: 1;
+            top: 4%;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+        }
+
+
+        .form-container {
+            max-width: 500px;
+            padding: 10px;
+            background-color: white;
+            border: 5px solid #ecebe4;
+            margin: auto;
+        }
+
+            .form-container input[type=text], .form-container input[type=password], .form-container input[type=email] {
+                width: 100%;
+                padding: 3px;
+                margin: 2px 0 4px 0;
+                border: none;
+                background: #f1f1f1;
+            }
+
+
+
+                .form-container input[type=text]:focus, .form-container input[type=password]:focus, .form-container input[type=email]:focus {
+                    background-color: #ddd;
+                    outline: none;
+                }
+
+
+
+            .form-container .btn {
+                background-color: #04AA6D;
+                color: white;
+                padding: 5px 8px;
+                border: none;
+                cursor: pointer;
+                width: 100%;
+                margin-bottom: 10px;
+                opacity: 0.8;
+            }
+
+
+            .form-container .cancel {
+                background-color: red;
+            }
+
+
+            .form-container .btn:hover, .open-button:hover {
+                opacity: 1;
+            }
+
+        h3 {
+            font-weight: bold;
+        }
+
+        #text{
+            text-align:center;
+        }
+    </style>
+
+</head>
+<body>
+    <div class="header">
+        <h2> Employee Deactivation Details </h2>
+    </div>
+    <div class="tablee">
+
+        <table id="tbldata" class="table table-bordered ">
+            <thead>
+                <tr>
+                    <th scope="col"> Employee Name</th>
+                    <th scope="col"> GID</th>
+                    <th scope="col"> Last Working Date</th>
+                    <th scope="col"> Team</th>
+                    <th scope="col"> Sponsor Name</th>
+                    <th scope="col"> Reporting Manager Email</th>
+                    <th scope="col"> Action</th>
+
+                </tr>
+            </thead>
+
+        </table>
+        <div id="text">
+            <h2>You don't have any new workflow</h2>
+        </div>
+
+    </div>
+</body>
+
