@@ -50,9 +50,9 @@ namespace EmployeeDeactivation.Controllers
 
         [HttpPost]
         [Route("Pdf/PdfAttachmentActivation")]
-        public void PdfAttachmentActivation(string memoryStream, string employeeName, string teamName, string sponsorGID)
+        public void PdfAttachmentActivation(string memoryStream, string employeeName, string teamName, string sponsorGID, string siemensGid)
         {
-            _pdfDataOperation.SendPdfAsEmailAttachmentActivation(memoryStream, employeeName, teamName, sponsorGID);
+            _pdfDataOperation.SendPdfAsEmailAttachmentActivation(memoryStream, employeeName, teamName, sponsorGID, siemensGid);
         }
 
         [HttpGet]

@@ -81,7 +81,7 @@ namespace EmployeeDeactivation.BusinessLayer
             var allDeactivationWorkfolw = (RetrieveDeactivationDetailss());
             foreach (var item in allDeactivationWorkfolw)
             {
-                if (item.Status.ToLower() == "pending" /*&& item.ReportingManagerEmail == userEmail*/)
+                if (item.Status.ToLower() == "pending" && item.ReportingManagerEmail == userEmail)
                 {
                     pendingDeactivationWorkflows.Add(item);
                 }

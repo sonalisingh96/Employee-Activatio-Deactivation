@@ -93,16 +93,16 @@ namespace EmployeeDeactivation.BusinessLayer
             SendEmail(reportingManagerEmailId,"","",employeeName,false,file);
         }
 
-        public void SendPdfAsEmailAttachmentActivation(string memoryStream, string employeeName, string teamName, string sponsorGID)
+        public void SendPdfAsEmailAttachmentActivation(string memoryStream, string employeeName, string teamName, string sponsorGID,string siemensGid)
         {
             var reportingManagerEmailId = _employeeDataOperation.GetReportingManagerEmailId(teamName);
             var sponsorEmailId = _employeeDataOperation.GetSponsorEmailId(sponsorGID);
             byte[] bytes = System.Convert.FromBase64String(memoryStream);
-
+            _employeeDataOperation.savepdf(bytes, siemensGid);
             var c = bytes;
             MemoryStream stream = new MemoryStream(bytes);
-            Attachment file = new Attachment(stream, "Deactivation workflow_" + employeeName + ".pdf", "application/pdf");
-            SendEmail(reportingManagerEmailId, sponsorEmailId,"gmail.com", employeeName, false, file);
+            Attachment file = new Attachment(stream, "Activation workflow_" + employeeName + ".pdf", "application/pdf");
+            SendEmail(reportingManagerEmailId,"techfox69@gmail.com","amnshuman1998@gmail.com", employeeName, false, file);
 
         }
 

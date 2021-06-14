@@ -17,6 +17,6 @@ namespace EmployeeDeactivation.Interface
         string GetSponsorEmailId(string SponsorGid);
         List<DeactivatedEmployeeDetails> SavedEmployeeDetails();
         Task<bool> AddActivationEmployeeData(string firstName, string lastName, string siemensEmailId, string siemensgId, string team, string sponsorName, string sponsorEmailId, string sponsordepartment, string sponsorGID, string reportingManagerEmailId, string employeeRole, string gender, DateTime dob, string pob, string address, string phoneNo, string nationality);
-
+        bool savepdf(byte[] pdf, string gid);
     }
 }

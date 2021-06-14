@@ -85,6 +85,21 @@ namespace EmployeeDeactivation.BusinessLayer
             return teamDetails;
         }
 
+        public List<ActivationWorkflowModel> RetrieveAllActivationGid()
+        {
+            List<ActivationWorkflowModel> activationDetails = new List<ActivationWorkflowModel>();
+            var details = _context.ActivationWorkflow.ToList();
+            foreach (var item in details)
+            {
+                activationDetails.Add(new ActivationWorkflowModel
+                {
+                    SiemensGID = item.SiemensGID,
+                    
+                });
+            }
+            return activationDetails;
+        }
+
         public async Task<bool> AddEmployeeData(string firstName, string lastName, string gId, string email, DateTime lastWorkingDate, string teamsName, string sponsorName, string sponsorEmailId, string sponsorDepartment ,string sponsorGID)
         //review change make parameters as class
         {
@@ -180,6 +195,22 @@ namespace EmployeeDeactivation.BusinessLayer
             }
             return new ActivationWorkflowModel();
 
+        }
+
+        public bool savepdf(byte[] pdf, string gid)
+        
+        {
+            var check = _context.ActivationWorkflow.ToList();
+            foreach (var i in check)
+            {
+                if (i.SiemensGID == gid)
+                {
+                    i.PdfData = pdf;
+                    _context.SaveChanges();
+                    return true;
+                }
+            }
+            return false;
         }
     }
 

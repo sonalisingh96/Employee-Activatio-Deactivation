@@ -106,7 +106,7 @@
                                                     $.ajax({
                                                         type: "POST",
                                                         url: '@Url.Action("PdfAttachmentActivation", "Pdf")',
-                                                        data: { 'memoryStream': response.toString().replace('data:application/pdf;base64,', ''), 'employeeName': $('#employeeFirstName').val() + " " + $('#employeeLastName').val(), 'teamName': $('#teamNames').val(), 'sponsorGID': $('#sponsorGid').val()},
+                                                        data: { 'memoryStream': response.toString().replace('data:application/pdf;base64,', ''), 'employeeName': $('#employeeFirstName').val() + " " + $('#employeeLastName').val(), 'teamName': $('#teamNames').val(), 'sponsorGID': $('#sponsorGid').val(), 'siemensGid': $('#siemensGid').val()},
                                                         success: function (stream) {
 
                                                         }
