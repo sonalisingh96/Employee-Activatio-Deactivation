@@ -42,6 +42,7 @@ namespace EmployeeDeactivation.BusinessLayer
         public async Task<bool> AddSponsorData(string teamName, string sponsorFirstName, string sponsorLastName, string sponsorGid, string sponsorEmail, string sponsorDepartment, string reportingManagerEmail)
         //review change make parameters as class
         {
+            bool databaseUpdateStatus=false;
             Teams sponsor = new Teams()
             {
                 TeamName = teamName,
@@ -59,11 +60,13 @@ namespace EmployeeDeactivation.BusinessLayer
                 if (i.SponsorGID == sponsorGid)
                 {
                     _context.Remove(_context.Teams.Single(a => a.SponsorGID == sponsorGid));
-                    await _context.SaveChangesAsync();
+                    _context.SaveChanges();
+                   
                 }
             }
-            await _context.AddAsync(sponsor);
-            var databaseUpdateStatus = await _context.SaveChangesAsync() == 1 ? true : false;
+            _context.Add(sponsor);
+            databaseUpdateStatus = _context.SaveChanges() == 1 ? true : false;
+
             return databaseUpdateStatus;
         }
         public async Task<bool> DeleteSponsorData(string gId)
@@ -108,10 +111,10 @@ namespace EmployeeDeactivation.BusinessLayer
             return employeeDetails;
         }
 
-        public List<DeactivatedEmployeeDetails> Customers()//Refactoring
+        public List<DeactivatedEmployeeDetails> DeactivationEmployeeData()//Refactoring
         {
-            List<DeactivatedEmployeeDetails> customers = (from customer in this._context.DeactivationWorkflow.Take(30000)select customer).ToList();
-            return customers;
+            List<DeactivatedEmployeeDetails> deactivationEmployeeData = (from deactivationEmployee in this._context.DeactivationWorkflow.Take(30000)select deactivationEmployee).ToList();
+            return deactivationEmployeeData;
         }
 
         public List<ActivationWorkflowModel> ActivationEmployeeData()

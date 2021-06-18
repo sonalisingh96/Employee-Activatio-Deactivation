@@ -24,7 +24,7 @@ namespace EmployeeDeactivation.Controllers
 
         public IActionResult AccountDeactivationDatePage()
         {
-            return View(_adminDataOperation.Customers());
+            return View(_adminDataOperation.DeactivationEmployeeData());
         }
         
 

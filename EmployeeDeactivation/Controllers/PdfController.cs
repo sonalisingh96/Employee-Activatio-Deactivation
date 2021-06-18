@@ -45,7 +45,7 @@ namespace EmployeeDeactivation.Controllers
         [Route("Pdf/PdfAttachment")]
         public void PdfAttachment(string memoryStream,string employeeName, string teamName)
         {
-            _pdfDataOperation.SendPdfAsEmailAttachment( memoryStream,  employeeName, teamName);
+            _pdfDataOperation.SendPdfAsEmailAttachmentDeactivation( memoryStream,  employeeName, teamName);
         }
 
         [HttpPost]
@@ -60,6 +60,13 @@ namespace EmployeeDeactivation.Controllers
         public void SendReminder()
         {
             _pdfDataOperation.SendReminderEmail();
+        }
+
+        [HttpPost]
+        [Route("Pdf/DeclineEmail")]
+        public void DeclineEmail( string gid, string employeeName)
+        {
+            _pdfDataOperation.SendEmailDeclined(gid, employeeName);
         }
 
 

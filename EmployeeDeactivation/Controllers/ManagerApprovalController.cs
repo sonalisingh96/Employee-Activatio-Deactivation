@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EmployeeDeactivation.Controllers
 {
-    [Authorize("Manager")]
+    
     public class ManagerApprovalController : Controller
     {
         private readonly IManagerApprovalOperation _managerAprovalOperation;
@@ -20,9 +20,9 @@ namespace EmployeeDeactivation.Controllers
             _managerAprovalOperation = managerAprovalOperation;
         }
 
+        [Authorize("Manager")]
         public IActionResult ManagerApprovalPage()
         {
-        
             return View();
         }
 
@@ -67,15 +67,13 @@ namespace EmployeeDeactivation.Controllers
         [Route("ManagerApproval/RequestApprove")]
         public JsonResult RequestApprove(string gId)
         {
-            
             return Json(_managerAprovalOperation.ApproveRequest(gId));
         }
 
         [HttpGet]
         [Route("ManagerApproval/RequestDenied")]
         public JsonResult RequestDenied(string gId)
-        {
-            
+        { 
             return Json(_managerAprovalOperation.DeclineRequest(gId));
         }
 

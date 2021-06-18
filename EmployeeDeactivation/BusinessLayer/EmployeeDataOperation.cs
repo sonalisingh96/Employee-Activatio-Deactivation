@@ -29,6 +29,19 @@ namespace EmployeeDeactivation.BusinessLayer
             return "";      
         }
 
+        public string GetEmployeeEmailId(string gid)
+        {
+            var DeactivationDetails = SavedEmployeeDetails();
+            foreach (var item in DeactivationDetails)
+            {
+                if (item.GId == gid)
+                {
+                    return item.Email;
+                }
+            }
+            return "";
+        }
+
         public string GetSponsorEmailId(string SponsorGid)
         {
             var teamDetails = RetrieveAllSponsorDetails();
@@ -103,6 +116,7 @@ namespace EmployeeDeactivation.BusinessLayer
         public async Task<bool> AddEmployeeData(string firstName, string lastName, string gId, string email, DateTime lastWorkingDate, string teamsName, string sponsorName, string sponsorEmailId, string sponsorDepartment ,string sponsorGID)
         //review change make parameters as class
         {
+            bool databaseUpdateStatus = false;
             DeactivatedEmployeeDetails employee = new DeactivatedEmployeeDetails()
             {
                 Firstname = firstName,
@@ -127,13 +141,15 @@ namespace EmployeeDeactivation.BusinessLayer
             }
 
             _context.Add(employee);
-            var databaseUpdateStatus = await _context.SaveChangesAsync() == 1 ? true : false;
+            databaseUpdateStatus = _context.SaveChanges() == 1 ? true : false;
             return databaseUpdateStatus;
         }
+
 
         public async Task<bool> AddActivationEmployeeData(string firstName, string lastName, string siemensEmailId, string siemensgId, string team, string sponsorName, string sponsorEmailId, string sponsordepartment, string sponsorGID, string reportingManagerEmailId, string employeeRole, string gender, DateTime dob, string pob, string address, string phoneNo, string nationality)
         //review change make parameters as class
         {
+            bool databaseUpdateStatus = false;
             ActivationWorkflowModel employeeActivate = new ActivationWorkflowModel()
             {
                 FirstName = firstName,
@@ -165,7 +181,7 @@ namespace EmployeeDeactivation.BusinessLayer
             }
 
             _context.Add(employeeActivate);
-            var databaseUpdateStatus = await _context.SaveChangesAsync() == 1 ? true : false;
+            databaseUpdateStatus = _context.SaveChanges() == 1 ? true : false;
             return databaseUpdateStatus;
         }
 

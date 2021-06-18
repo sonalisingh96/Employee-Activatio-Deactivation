@@ -109,17 +109,33 @@ namespace EmployeeDeactivation.BusinessLayer
         public List<ManagerApprovalStatus> GetAllApprovedDeactivationWorkflows()
         {
 
-            List<ManagerApprovalStatus> pendingDeactivationWorkflows = new List<ManagerApprovalStatus>();
+            List<ManagerApprovalStatus> approvedDeactivationWorkflows = new List<ManagerApprovalStatus>();
             var allDeactivationWorkfolw = (RetrieveDeactivationDetailss());
             foreach (var item in allDeactivationWorkfolw)
             {
                 if (item.Status.ToLower() == "approve")
                 {
-                    pendingDeactivationWorkflows.Add(item);
+                    approvedDeactivationWorkflows.Add(item);
                 }
 
             }
-            return pendingDeactivationWorkflows;
+            return approvedDeactivationWorkflows;
+        }
+
+        public List<ManagerApprovalStatus> GetAllDeclinedDeactivationWorkflows()
+        {
+
+            List<ManagerApprovalStatus> declinedDeactivationWorkflows = new List<ManagerApprovalStatus>();
+            var allDeactivationWorkfolw = (RetrieveDeactivationDetailss());
+            foreach (var item in allDeactivationWorkfolw)
+            {
+                if (item.Status.ToLower() == "denied")
+                {
+                    declinedDeactivationWorkflows.Add(item);
+                }
+
+            }
+            return declinedDeactivationWorkflows;
         }
 
         public bool ApproveRequest(string gId)

@@ -84,14 +84,25 @@
             $(document).on("click", "#decline", function (e) {
                
             var $row = $(this).closest("tr"),
-                $tds = $row.find("td:nth-child(2)").text();
+                    $tds = $row.find("td:nth-child(2)").text();
+                $tdss = $row.find("td:nth-child(1)").text();
                             $.ajax({
                                 type: "GET",
                                 url: '@Url.Action("RequestDenied", "ManagerApproval")',
                                 data: {'GId': $tds},
                                 dataType: "json",
-                                success:function (r) {
-                                        window.location.reload()     
+                                success: function (r) {
+                                    window.location.reload(); 
+                                    $.ajax({
+                                type: "POST",
+                                url: '@Url.Action("DeclineEmail", "Pdf")',
+                                data: { 'gid': $tds, 'employeeName': $tdss },
+                                dataType: "json",
+                                success:function (f) {
+                                     
+                                }
+                            });
+                                        
                                 }
                             });
                    

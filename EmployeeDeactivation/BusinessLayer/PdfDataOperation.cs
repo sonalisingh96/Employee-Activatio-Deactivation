@@ -53,22 +53,22 @@ namespace EmployeeDeactivation.BusinessLayer
         public byte[] FillActivationPdfForm(string GId)
         {
             var activationEmployeeData = _employeeDataOperation.RetrieveActivationDataBasedOnGid(GId);
-            FileStream docStream = new FileStream("Activationpdf.pdf", FileMode.Open, FileAccess.Read);
+            FileStream docStream = new FileStream("Activation.pdf", FileMode.Open, FileAccess.Read);
             PdfLoadedDocument loadedDocument = new PdfLoadedDocument(docStream);
             PdfLoadedForm form = loadedDocument.Form;
-            PdfLoadedComboBoxField loadedListBox = form.Fields[8] as PdfLoadedComboBoxField ;
+            PdfLoadedComboBoxField loadedListBox = form.Fields[8] as PdfLoadedComboBoxField;
             for (int i = 0; i < loadedListBox.Values.Count; i++)
             {
-                if(loadedListBox.Values[i].Value == activationEmployeeData.Gender)
+                if (loadedListBox.Values[i].Value == activationEmployeeData.Gender)
                 {
                     loadedListBox.SelectedValue = activationEmployeeData.Gender;
                 }
             }
-            (form.Fields[11] as PdfLoadedTextBoxField).Text = activationEmployeeData.FirstName;
-            (form.Fields[10] as PdfLoadedTextBoxField).Text = activationEmployeeData.LastName;
-            (form.Fields[12] as PdfLoadedTextBoxField).Text = activationEmployeeData.SiemensGID;
-            (form.Fields[13] as PdfLoadedTextBoxField).Text = activationEmployeeData.PlaceofBirth;
             (form.Fields[9] as PdfLoadedTextBoxField).Text = activationEmployeeData.DateOfBirth.ToString();
+            (form.Fields[10] as PdfLoadedTextBoxField).Text = activationEmployeeData.LastName;
+            (form.Fields[11] as PdfLoadedTextBoxField).Text = activationEmployeeData.FirstName;
+            (form.Fields[12] as PdfLoadedTextBoxField).Text = activationEmployeeData.Address;
+            (form.Fields[13] as PdfLoadedTextBoxField).Text = activationEmployeeData.PlaceofBirth;
             string sponsorFullName = activationEmployeeData.SponsorName;
             string[] splitsponsorFullName = sponsorFullName.Split(' ');
             (form.Fields[16] as PdfLoadedTextBoxField).Text = splitsponsorFullName[0];
@@ -83,14 +83,14 @@ namespace EmployeeDeactivation.BusinessLayer
             return bytes;
         }
 
-        public void SendPdfAsEmailAttachment(string memoryStream, string employeeName, string teamName)
+        public void SendPdfAsEmailAttachmentDeactivation(string memoryStream, string employeeName, string teamName)
         {
             var reportingManagerEmailId = _employeeDataOperation.GetReportingManagerEmailId(teamName);
             byte[] bytes = System.Convert.FromBase64String(memoryStream);
             var c = bytes;
             MemoryStream stream = new MemoryStream(bytes);
             Attachment file = new Attachment(stream, "Deactivation workflow_" + employeeName + ".pdf", "application/pdf");
-            SendEmail(reportingManagerEmailId,"","",employeeName,false,file);
+            SendEmail(reportingManagerEmailId,employeeName,false,false, true, file);
         }
 
         public void SendPdfAsEmailAttachmentActivation(string memoryStream, string employeeName, string teamName, string sponsorGID,string siemensGid)
@@ -102,7 +102,17 @@ namespace EmployeeDeactivation.BusinessLayer
             var c = bytes;
             MemoryStream stream = new MemoryStream(bytes);
             Attachment file = new Attachment(stream, "Activation workflow_" + employeeName + ".pdf", "application/pdf");
-            SendEmail(reportingManagerEmailId,"techfox69@gmail.com","amnshuman1998@gmail.com", employeeName, false, file);
+            SendEmail(reportingManagerEmailId, employeeName, false,false, true, file);
+            SendEmail(sponsorEmailId, employeeName, false,false, true, file);
+            SendEmail("1by16cs072@bmsit.in", employeeName,false,false, true, file);            
+
+        }
+
+        public void SendEmailDeclined(string gid, string employeeName)
+        {
+            var employeeManagerEmailId = _employeeDataOperation.GetEmployeeEmailId(gid);
+            Attachment file = null;
+            SendEmail(employeeManagerEmailId, employeeName, false,true, false, file);
 
         }
 
@@ -118,10 +128,10 @@ namespace EmployeeDeactivation.BusinessLayer
                 {
                     MemoryStream stream = new MemoryStream(item.PdfAttachment);
                     Attachment file = new Attachment(stream, "Deactivation workflow_" + item.EmployeeName + ".pdf", "application/pdf");
-                    SendEmail(item.ReportingManagerEmail,"","", item.EmployeeName, true,file);
+                    SendEmail(item.ReportingManagerEmail, item.EmployeeName, true , false , false, file);
                 }  
             }
-            var approvedEmployeeDetails = _managerApprovalOperation.GetAllApprovedDeactivationWorkflows();
+            var approvedEmployeeDetails = _managerApprovalOperation.GetAllApprovedDeactivationWorkflows() ;
             var employeeData = _employeeDataOperation.SavedEmployeeDetails();            
             foreach (var item in approvedEmployeeDetails)
             {
@@ -133,27 +143,35 @@ namespace EmployeeDeactivation.BusinessLayer
                         {
                             MemoryStream stream = new MemoryStream(item.PdfAttachment);
                             Attachment file = new Attachment(stream, "Deactivation workflow_" + item.EmployeeName + ".pdf", "application/pdf");
-                            SendEmail("",employee.SponsorEmailID,"", item.EmployeeName, true, file);
+                            SendEmail(employee.SponsorEmailID, item.EmployeeName, true,false,false, file);
                         }
                     }
                 }
             }
-
         }
-        private void SendEmail(string reportingManagerEmail , string  sponsorEmailId, string cmEmailId, string employeeName, bool isReminderEmail, Attachment file )
+
+
+        private void SendEmail(string Email , string employeeName, bool isReminderEmail, bool isDeclinedEmail,bool isActivationDeactivationEmail, Attachment file )
         {
             MailMessage message = new MailMessage();
             message.From = new MailAddress("dontreplydeactivationworkflow@gmail.com");
             message.Sender = new MailAddress("dontreplydeactivationworkflow@gmail.com");
-            message.To.Add(reportingManagerEmail);
-            message.To.Add(sponsorEmailId);
-            message.To.Add(cmEmailId);
-            message.Subject = "Deactivation workflow initiated";
-            if (isReminderEmail)
-            { 
-                message.Body = "Today is " + employeeName+"'s last working day please check if you have approved the deactivation workflow";
+            message.To.Add(Email);
+            if (isDeclinedEmail)
+            {
+                message.Subject = "Deactivation workflow declined";
+                message.Body = employeeName + " your account deactivation form has been declined";
+                
             }
-            else {
+            if (isActivationDeactivationEmail)
+            {
+                message.Subject = "Workflow initiated";
+                message.Attachments.Add(file);
+            }
+            if (isReminderEmail)
+            {
+                message.Subject = "Deactivation workflow";
+                message.Body = "Today is " + employeeName+"'s last working day please check if you have approved the deactivation workflow";
                 message.Attachments.Add(file);
             }
             

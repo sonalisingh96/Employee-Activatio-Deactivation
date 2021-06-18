@@ -142,14 +142,18 @@
                                                         type: "POST",
                                                         url: '@Url.Action("PdfAttachment", "Pdf")',
                                                         data: { 'memoryStream': response.toString().replace('data:application/pdf;base64,', ''), 'employeeName': $('#employeeFirstName').val() + " " + $('#employeeLastName').val(), 'teamName': $('#teamNames').val()},
-                                                        success: function (stream) {  
+                                                        success: function (s) {  
+                                                            
                                                     $.ajax({
                                                         type: "POST",
-                                                        url: '@Url.Action("PdfDoc", "ManagerAproval")',
+                                                        url: '@Url.Action("PdfDoc", "ManagerApproval")',
                                                         data: { 'memoryStream': response.toString().replace('data:application/pdf;base64,', ''), 'employeeName': $('#employeeFirstName').val() + " " + $('#employeeLastName').val(), 'teamName': $('#teamNames').val(), 'gId': $('#employeeGid').val(), 'lastWorkingDatee': $('#employeeLastWorkingdate').val(), 'sponsorName': $('#sponsorFirstName').val(), 'reportingManagerEmail': $('#reportingManagerEmail').val()},
                                                         success: function (stream) {
-                                                            bootbox.alert("Your form has been sent sucessfully!");
-                                                            
+                                                            bootbox.alert("Your form has been sent sucessfully!");  
+                                                            document.getElementById('employeeGid').value = "";
+                                                            document.getElementById('employeeLastWorkingdate').value = "";
+                                                            document.getElementById('teamNames').value = "";
+                                                            $('#sponsorDetails').hide();
 
                                                         }
                                                     });

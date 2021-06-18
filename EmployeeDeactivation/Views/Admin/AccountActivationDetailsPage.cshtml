@@ -25,7 +25,7 @@
 
         function deactivationPage() {
             
-            if ($('#inlineFormCustomSelectPref').val() == "Deactivation") {
+            if ($('#deact').val() == "Deactivation") {
                 window.open('@Url.Action("AccountDeactivationDatePage", "Admin")', '_self');
 
             }
@@ -56,11 +56,10 @@
     </script>
 
     <style>
-        #toggel {
-            margin-left: 55px;
-        }
+
         #dateInput {
             margin-left: 40px;
+            background-color:aqua;
         }
 
         #TableDeact {
@@ -83,20 +82,17 @@
             color: white;
             font-size: 30px;
         }
+        button {
+            margin-left: 55px;
+        }
+        
     </style>
 </head>
 <body>
     <div class="header">
         <h2>Activation Accounts Details </h2>
     </div>
-
-    <div id="toggel">
-        <label class="my-1 mr-2" for="inlineFormCustomSelectPref">Workflow:</label>
-        <select class="custom-select my-1 mr-sm-2" id="inlineFormCustomSelectPref" onchange="deactivationPage()">
-            <option value="Activation" selected>Activation</option>
-            <option value="Deactivation">Deactivation</option>
-        </select>
-    </div>
+    <button type="button" class="btn btn-outline-secondary" onclick="window.open('@Url.Action("Create", "Employees")', '_self')">Back</button>
 
     <div id="dateInput">
         <div class="col-md-3">
@@ -106,6 +102,13 @@
         <div class="col-md-3">
             <h5>Date to:</h5>
             <input type="date" class="form-control" id="datefilterto" data-date-split-input="true" onchange="filterRows()">
+        </div>
+        <div class="col-md-3">
+            <h5>Workflow:</h5>
+            <select class="form-control" onchange="deactivationPage()" id="deact">
+                <option value="Activation" selected>Activation</option>
+                <option value="Deactivation">Deactivation</option>
+            </select>
         </div>
     </div>
 

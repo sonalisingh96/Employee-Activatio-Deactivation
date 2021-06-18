@@ -54,8 +54,11 @@
                                 success:
                                     function (response) {
                                         if (response) {
-                                            bootbox.alert("Sponsor details has been sucessfully deleted", function () {
-                                                window.location.reload()
+                                            bootbox.alert({
+                                                messsage: "Sponsor details has been sucessfully deleted",
+                                                callback: function () {
+                                                    window.location.reload();
+                                                }
                                             });
                                     };
 
@@ -106,7 +109,15 @@
                     url: '@Url.Action("AddSponsorDetails", "Admin")',
                     dataType: "json",
                     data: { 'teamName': $('#editTeamName').val(), 'sponsorFirstName': $('#editFirstName').val(), 'sponsorLastName': $('#editLastName').val(), 'sponsorGid': $('#editgid').val(), 'sponsorEmail': $('#editEmail').val(), 'sponsorDepartment': $('#editDepartment').val(), 'reportingManagerEmail': $('#editRmEmail').val() },
-                    success: alert("Sponsor Details Have been edited Sucessfully!")
+                    success: function (response) {
+                        if (response) {
+                            bootbox.alert("Sponsor Details Have been edited Sucessfully!", function () {
+                                window.location.reload();
+                            });
+
+                        }
+
+                    }
 
 
                 });
@@ -122,19 +133,16 @@
                     url: '@Url.Action("AddSponsorDetails", "Admin")',
                     dataType: "json",
                     data: { 'teamName': $('#teamName').val(), 'sponsorFirstName': $('#sponsorFirstName').val(), 'sponsorLastName': $('#sponsorLastName').val(), 'sponsorGid': $('#sponsorGid').val(), 'sponsorEmail': $('#sponsorEmail').val(), 'sponsorDepartment': $('#sponsorDepartment').val(), 'reportingManagerEmail': $('#reportingManEmail').val() },
-                    success:alert("Sponsor Details Have been added Sucessfully!")
-                    //    function (response) {
-                    //    if (response) {
-                    //        bootbox.alert("Sponsor Details Have been deleted Sucessfully!", function () {
-                    //            window.location.reload();
-                    //        });
+                    success: 
+                        function (response) {
+                        if (response) {
+                            bootbox.alert("Sponsor Details Have been added Sucessfully!", function () {
+                                window.location.reload();
+                            });
 
-                    //    }
-                    //    else {
-                    //        alert("hdkfhkh");
-                    //    }
+                        }
 
-                    //}
+                    }
                 });
             });
         });
@@ -169,7 +177,7 @@
         .tablee {
             padding-left: 50px;
             padding-right: 50px;
-            margin-top: 100px;
+            margin-top: 40px;
         }
 
         .header {
@@ -267,12 +275,16 @@
         h3 {
             font-weight: bold;
         }
+        #backButton {
+            margin-left: 55px;
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <h2> Sponsor Details </h2>
     </div>
+    <button type="button" id="backButton" class="btn btn-outline-secondary" onclick="window.open('@Url.Action("Create", "Employees")', '_self')">Back</button>
     <div class="tablee">
 
         <table id="tbldata" class="table table-bordered ">
@@ -293,7 +305,7 @@
 
     </div>
 
-    <input type="button" value="ADD" class="btn btn-default"  id="addButton" />
+    <input type="button" value="ADD" class="btn btn-default" id="addButton" />
     <div id="pop1">
         <div class="form-popup" id="myForm">
             <form class="form-container">
@@ -346,7 +358,7 @@
                 <input type="text" placeholder="GID" name="gid" id="editgid" readonly>
 
                 <label for="email"><b>Sponsor Email Id</b></label>
-                <input type="email" placeholder="Email Id" name="email" id="editEmail" >
+                <input type="email" placeholder="Email Id" name="email" id="editEmail">
 
                 <label for="department"><b>Sponsor Department</b></label>
                 <input type="text" placeholder="Department" name="department" id="editDepartment">
