@@ -111,11 +111,12 @@
                     data: { 'teamName': $('#editTeamName').val(), 'sponsorFirstName': $('#editFirstName').val(), 'sponsorLastName': $('#editLastName').val(), 'sponsorGid': $('#editgid').val(), 'sponsorEmail': $('#editEmail').val(), 'sponsorDepartment': $('#editDepartment').val(), 'reportingManagerEmail': $('#editRmEmail').val() },
                     success: function (response) {
                         if (response) {
-                            bootbox.alert("Sponsor Details Have been edited Sucessfully!", function () {
-                                window.location.reload();
+                            bootbox.alert({
+                                messsage: "Sponsor details has been sucessfully edited",
+                                callback: function () {
+                                    window.location.reload();
+                                }
                             });
-
-                        }
 
                     }
 
@@ -135,12 +136,13 @@
                     data: { 'teamName': $('#teamName').val(), 'sponsorFirstName': $('#sponsorFirstName').val(), 'sponsorLastName': $('#sponsorLastName').val(), 'sponsorGid': $('#sponsorGid').val(), 'sponsorEmail': $('#sponsorEmail').val(), 'sponsorDepartment': $('#sponsorDepartment').val(), 'reportingManagerEmail': $('#reportingManEmail').val() },
                     success: 
                         function (response) {
-                        if (response) {
-                            bootbox.alert("Sponsor Details Have been added Sucessfully!", function () {
-                                window.location.reload();
-                            });
-
-                        }
+                            if (response) {
+                                bootbox.alert({
+                                    messsage: "Sponsor details has been sucessfully added",
+                                    callback: function () {
+                                        window.location.reload();
+                                    }
+                                });
 
                     }
                 });
